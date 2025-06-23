@@ -1,4 +1,4 @@
-# x11libre Security Policy
+# x11libre-65kmaxres Security Policy
 
 ## 📢 Reporting Vulnerabilities
 

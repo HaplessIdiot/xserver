@@ -1,10 +1,10 @@
-# x11libre-65kmaxres Security Policy
+# x11libre Security Policy
 
 ##  Reporting Vulnerabilities
 
 We take security seriously in x11libre. If you discover any vulnerabilities, please report them responsibly.
 
-- **Contact**: legendarydood@gmail.com 
+- **Contact**: https://github.com/metux or legendarydood@gmail.com 
 - **Preferred Method**: Email with detailed reproduction steps, logs, and system info 
 - **Public Disclosure**: Please wait until we’ve resolved the issue before making it public 
 

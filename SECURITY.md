@@ -4,7 +4,7 @@
 
 We take security seriously in x11libre. If you discover any vulnerabilities, please report them responsibly.
 
-- **Contact**: https://github.com/metux or legendarydood@gmail.com 
+- **Contact**: https://github.com/metux info@metux.net legendarydood@gmail.com
 - **Preferred Method**: Email with detailed reproduction steps, logs, and system info 
 - **Public Disclosure**: Please wait until we’ve resolved the issue before making it public 
 

@@ -12,7 +12,7 @@ We take security seriously in x11libre. If you discover any vulnerabilities, ple
 
 | Version         | Status                    |
 | --------------- | ------------------------- |
-| `main` branch   |  Supported and maintained |
+| `master` branch |  Supported and maintained |
 | Older tags      |  No longer supported      |
 
 We recommend always using the latest release for performance and security fixes.

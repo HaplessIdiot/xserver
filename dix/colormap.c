@@ -1739,7 +1739,7 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     pmap->numPixelsBlue[client] += npixB;
     pmap->freeBlue -= npixB;
 
-    for (pDst = pixels; pDst < pixels + c; pDst++)
+    for (pDst = pixels; (pDst - pixels) < c; pDst++)
         *pDst |= ALPHAMASK(pmap->pVisual);
 
     free(ppixBlue);

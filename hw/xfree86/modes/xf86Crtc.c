@@ -1453,7 +1453,7 @@ preferredMode(ScrnInfoPtr pScrn, xf86OutputPtr output)
     preferred_mode = xf86GetOptValString(output->options, OPTION_PREFERRED_MODE);
     if (preferred_mode)
         return preferred_mode;
-
+  
     /* Try to find a mode with ~75Hz refresh rate */
     DisplayModePtr mode = output->probed_modes;
     while (mode) {
@@ -1462,10 +1462,8 @@ preferredMode(ScrnInfoPtr pScrn, xf86OutputPtr output)
         if (mode->HTotal > 0 && mode->VTotal > 0)
             refresh = ((float)mode->Clock * 1000.0f) /
                       ((float)mode->HTotal * (float)mode->VTotal);
-
         if ((int)(refresh + 0.5f) >= 75)
             return mode->name;
-
         mode = mode->next;
     }
 

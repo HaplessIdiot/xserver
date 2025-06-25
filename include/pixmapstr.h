@@ -60,10 +60,10 @@ typedef struct _Drawable {
     unsigned char depth;
     unsigned char bitsPerPixel;
     XID id;                     /* resource id */
-    u_int16_t x;                    /* window: screen absolute, pixmap: 0 */
-    u_int16_t y;                    /* window: screen absolute, pixmap: 0 */
-    u_int16_t width;
-    u_int16_t height;
+    short x;                    /* window: screen absolute, pixmap: 0 */
+    short y;                    /* window: screen absolute, pixmap: 0 */
+    short width;
+    short height;
     ScreenPtr pScreen;
     unsigned long serialNumber;
 } DrawableRec;

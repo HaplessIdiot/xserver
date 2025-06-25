@@ -1713,27 +1713,27 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     *pbmask <<= pmap->pVisual->offsetBlue;
 
     ppix = rpix + pmap->numPixelsRed[client];
-    for (pDst = pixels, p = ppixRed; p < ppixRed + npixR; p++) {
+    for (pDst = pixels, p = ppixRed; (size_t)(p - ppixRed) < npixR; p++) {
         *ppix++ = *p;
-        if (p < ppixRed + c)
+        if ((size_t)(p - ppixRed) < c)
             *pDst++ |= *p << pmap->pVisual->offsetRed;
     }
     pmap->numPixelsRed[client] += npixR;
     pmap->freeRed -= npixR;
 
     ppix = gpix + pmap->numPixelsGreen[client];
-    for (pDst = pixels, p = ppixGreen; p < ppixGreen + npixG; p++) {
+    for (pDst = pixels, p = ppixGreen; (size_t)(p - ppixGreen) < npixG; p++) {
         *ppix++ = *p;
-        if (p < ppixGreen + c)
+        if ((size_t)(p - ppixGreen) < c)
             *pDst++ |= *p << pmap->pVisual->offsetGreen;
     }
     pmap->numPixelsGreen[client] += npixG;
     pmap->freeGreen -= npixG;
 
     ppix = bpix + pmap->numPixelsBlue[client];
-    for (pDst = pixels, p = ppixBlue; p < ppixBlue + npixB; p++) {
+    for (pDst = pixels, p = ppixBlue; (size_t)(p - ppixBlue) < npixB; p++) {
         *ppix++ = *p;
-        if (p < ppixBlue + c)
+        if ((size_t)(p - ppixBlue) < c)
             *pDst++ |= *p << pmap->pVisual->offsetBlue;
     }
     pmap->numPixelsBlue[client] += npixB;

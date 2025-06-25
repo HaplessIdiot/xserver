@@ -1,8 +1,8 @@
-# x11libre-65kmaxres Security Policy
+# X11Libre Security Policy
 
 ##  Reporting Vulnerabilities
 
-We take security seriously in x11libre. If you discover any vulnerabilities, please report them responsibly.
+We take security seriously in X11Libre. If you discover any vulnerabilities, please report them responsibly.
 
 - **Contact**: legendarydood@gmail.com 
 - **Preferred Method**: Email with detailed reproduction steps, logs, and system info 

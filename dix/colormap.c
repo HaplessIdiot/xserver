@@ -1782,7 +1782,7 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
         pDst = pixels;
         for (p = ppixTemp; p < ppixTemp + npix; p++) {
             *ppix++ = *p;
-            if (p < ppixTemp + c)
+            if ((p - ppixTemp) < c)
                 *pDst++ = *p;
         }
         pmap->numPixelsRed[client] += npix;

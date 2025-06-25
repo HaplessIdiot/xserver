@@ -1771,7 +1771,7 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
         ppix = reallocarray(pmap->clientPixelsRed[client],
                             pmap->numPixelsRed[client] + npix, sizeof(Pixel));
         if (!ppix) {
-            for (p = ppixTemp; p < ppixTemp + npix; p++)
+            for (p = ppixTemp; (p - ppixTemp) < npix; p++)
                 pmap->red[*p].refcnt = 0;
             free(ppixTemp);
             return BadAlloc;

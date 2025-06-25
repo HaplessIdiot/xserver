@@ -1657,7 +1657,7 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
         return BadAlloc;
 
     /* start out with empty pixels */
-    for (p = pixels; p < pixels + c; p++)
+    for (p = pixels; (p - pixels) < c; p++)
         *p = 0;
 
     ppixRed = calloc(npixR, sizeof(Pixel));

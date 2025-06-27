@@ -1,5 +1,9 @@
 name: Run Flawfinder
 
+permissions:
+  contents: read
+  actions: write
+
 on:
   push:
     paths:

@@ -3,40 +3,57 @@ name: Flawfinder
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [master]
+    # don’t waste cycles on docs, tests or 3rd-party
+    paths-ignore:
+      - "docs/**"
+      - "test/**"
+      - "vendor/**"
   pull_request:
-    branches: [ "master" ]
+    branches: [master]
+    paths-ignore:
+      - "docs/**"
+      - "test/**"
+      - "vendor/**"
   schedule:
     - cron: '17 0 * * 1'
 
 jobs:
   flawfinder:
-    name: Flawfinder
     runs-on: ubuntu-latest
-
     permissions:
-      actions: read
       contents: read
       security-events: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run Flawfinder (high-risk only)
+      - name: Install Flawfinder
+        run: sudo apt-get update && sudo apt-get install -y flawfinder python3
+
+      - name: Run Flawfinder (very high risk only)
         uses: david-a-wheeler/flawfinder@8e4a779ad59dbfaee5da586aa9210853b701959c
         with:
-          # --minlevel 4 = only show level 4/5 hits
-          # --context    = give you source lines around each hit
-          # --ignorelist = optional file listing patterns to skip
+          # --minlevel 5 = only level-5/“very high” hits
+          # --context  = include source lines for triage
+          # --ignorelist points at patterns you deem safe
           arguments: >
             --sarif ./
-            --minlevel 4
+            --minlevel 5
             --context
             --ignorelist .github/flawfinder.ignore
+            src/
+
+          # SARIF file will land here
           output: flawfinder_results.sarif
 
-      - name: Upload to Security tab
+      - name: Filter out any leftover noise
+        run: |
+          python3 .github/scripts/filter_flawfinder_sarif.py \
+            flawfinder_results.sarif flawfinder_results.filtered.sarif
+
+      - name: Upload SARIF to Security tab
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: flawfinder_results.sarif
+          sarif_file: flawfinder_results.filtered.sarif

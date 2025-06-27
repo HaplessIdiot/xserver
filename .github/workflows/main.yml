@@ -1,12 +1,62 @@
-name: lint
+name: CI Lint
 
-on: [pull_request]
+on:
+  pull_request:
+
 permissions:
   contents: read
+  security-events: write
+
 jobs:
-  clang-tidy:
-    name: clang-tidy
+  code-scan:
     runs-on: ubuntu-latest
     steps:
-      - name: C++ code check using clang/cppcheck/flawfinder
-        uses: Tlazypanda/cpp-clang-check@0.13
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy cppcheck flawfinder python3
+
+      - name: clang-tidy analysis
+        run: |
+          mkdir -p sarif
+          find . -type f \( -name '*.cpp' -o -name '*.h' \) \
+            | xargs clang-tidy -p=. > sarif/clang-tidy.txt || true
+
+      - name: Convert clang-tidy → SARIF
+        uses: advanced-security/clang-tidy-sarif-action@v1
+        with:
+          input: sarif/clang-tidy.txt
+          output: sarif/clang-tidy.sarif
+
+      - name: cppcheck → SARIF
+        uses: advanced-security/cppcheck-sarif-action@v1
+        with:
+          source-root: .
+          output: sarif/cppcheck.sarif
+
+      - name: flawfinder analysis + SARIF
+        run: |
+          flawfinder . > sarif/flawfinder.txt || true
+          python3 - <<'EOF'
+import json
+run = {"tool":{"driver":{"name":"flawfinder","version":"2.0.19"}},"results":[]}
+for l in open('sarif/flawfinder.txt'):
+  parts = l.split(':', 3)
+  if len(parts) >= 4:
+    run["results"].append({
+      "level":"warning",
+      "message":{"text":parts[3].strip()},
+      "locations":[{"physicalLocation":{
+        "artifactLocation":{"uri":parts[0]},
+        "region":{"startLine":int(parts[1])}
+      }}]
+    })
+json.dump({"version":"2.1.0","runs":[run]}, open('sarif/flawfinder.sarif','w'), indent=2)
+EOF
+
+      - name: Upload all SARIF reports
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: sarif/*.sarif

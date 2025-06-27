@@ -775,24 +775,9 @@ XkbResizeKeyActions(XkbDescPtr xkb, int key, int needed)
         nActs += nKeyActs;
     }
     free(xkb->server->acts);
-    xkb->server->acts = NULL; // Nullify acts to prevent accidental access
     xkb->server->acts = newActs;
-    /* Ensure all references to the old memory are updated */
-    for (i = xkb->min_key_code; i <= (int) xkb->max_key_code; i++) {
-        if (xkb->server->key_acts[i] != 0) {
-            xkb->server->key_acts[i] = (unsigned int)(&newActs[xkb->server->key_acts[i]] - newActs);
-        }
-    }
     xkb->server->num_acts = nActs;
-
-    /* Update key_acts to ensure no dangling references */
-    for (i = xkb->min_key_code; i <= (int) xkb->max_key_code; i++) {
-        if (xkb->server->key_acts[i] != 0) {
-            xkb->server->key_acts[i] = (unsigned int)(&newActs[xkb->server->key_acts[i]] - newActs);
-        }
-    }
-
-    return &newActs[xkb->server->key_acts[key]];
+    return &xkb->server->acts[xkb->server->key_acts[key]];
 }
 
 void

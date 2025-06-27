@@ -1,34 +1,31 @@
-# .github/workflows/flawfinder.yml
-name: Flawfinder
+# .github/workflows/flawfinder-analysis.yml
+name: Flawfinder Code Scanning
 
 on:
   push:
-    branches: [master]
-    paths-ignore: ["docs/**","test/**","vendor/**"]
+    branches: [ master ]
   pull_request:
-    branches: [master]
-    paths-ignore: ["docs/**","test/**","vendor/**"]
-
-permissions:
-  contents: read
-  security-events: write
+    branches: [ master ]
 
 jobs:
-  scan:
+  flawfinder:
+    name: Run Flawfinder and upload SARIF
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install Flawfinder
-        run: sudo apt-get update && sudo apt-get install -y flawfinder python3
-
-      - name: Run Flawfinder → raw SARIF
         run: |
-          flawfinder --sarif ./ --minlevel 1 ./src > flawfinder.txt || true
-          python3 .github/scripts/filter_flawfinder_sarif.py \
-            flawfinder.txt flawfinder.sarif
+          sudo apt-get update
+          sudo apt-get install -y flawfinder  # or: pip3 install flawfinder
 
-      - name: Upload SARIF
+      - name: Run Flawfinder → SARIF
+        # scan entire repo, min level 1 (Note+), output SARIF
+        run: |
+          flawfinder --minlevel=1 --sarif . > flawfinder-results.sarif
+
+      - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: flawfinder.sarif
+          sarif_file: flawfinder-results.sarif

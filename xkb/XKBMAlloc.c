@@ -792,7 +792,7 @@ XkbResizeKeyActions(XkbDescPtr xkb, int key, int needed)
         }
     }
 
-    return &newActs[xkb->server->key_acts[key]];;
+    return &newActs[xkb->server->key_acts[key]];
 }
 
 void

@@ -1,74 +1,83 @@
 #!/usr/bin/env python3
-import re, json, sys
+import re, json, sys, os
 from collections import defaultdict
 
-# Input and output file paths
+# ─── Inputs ────────────────────────────────────────────────────────────────────
 infile, outfile = sys.argv[1], sys.argv[2]
+repo_root = os.getcwd()  # GitHub runner's workspace root
 
-# SARIF skeleton
+# ─── SARIF skeleton ────────────────────────────────────────────────────────────
 sarif = {
-    "version": "2.1.0",
-    "runs": [{
-        "tool": {
-            "driver": {
-                "name": "flawfinder",
-                "rules": []
-            }
-        },
-        "results": []
-    }]
+  "version": "2.1.0",
+  "runs": [{
+    "tool": {
+      "driver": {
+        "name": "flawfinder",
+        "rules": []
+      }
+    },
+    "results": []
+  }]
 }
 
 severity_map = {
-    5: ("error",    "Critical"),
-    4: ("warning",  "High"),
-    3: ("warning",  "Medium"),
-    2: ("note",     "Low"),
-    1: ("note",     "Note")
+  5: ("error",   "Critical"),
+  4: ("warning", "High"),
+  3: ("warning", "Medium"),
+  2: ("note",    "Low"),
+  1: ("note",    "Note"),
 }
 
-# Parse Flawfinder output
-pattern = re.compile(r'^(.+?):(\d+):\s*\((\d)\)\s*(.*)$')
-rule_descriptions = defaultdict(lambda: {
-    "shortDescription": {"text": "Potential security flaw"},
-    "fullDescription": {"text": "Issue reported by Flawfinder"},
-    "defaultConfiguration": {"level": "warning"}
+# We'll collect one rule-metadata block per ruleId
+rule_meta = defaultdict(lambda: {
+  "shortDescription": {"text": "Potential security flaw"},
+  "fullDescription":  {"text": ""},
+  "defaultConfiguration": {"level": "warning"}
 })
 
-for line in open(infile):
+pattern = re.compile(r'^(.+?):(\d+):\s*\((\d)\)\s*(.*)$')
+with open(infile) as inf:
+  for line in inf:
     m = pattern.match(line)
     if not m:
-        continue
-    path, line_no, risk, msg = m.groups()
+      continue
+
+    raw_path, line_no, risk, msg = m.groups()
     risk = int(risk)
-    lvl, sev = severity_map[risk]
+    level, sev = severity_map[risk]
 
-    # Extract rule ID from the start of the message (e.g., 'strcpy', 'gets')
-    rule_id_match = re.match(r'(\w+)', msg)
-    rule_id = rule_id_match.group(1) if rule_id_match else "flawfinder.unknown"
+    # 1) Make the file path relative to the repo root
+    norm = os.path.normpath(raw_path)
+    rel  = os.path.relpath(norm, repo_root)
 
-    rule_descriptions[rule_id]["name"] = rule_id
-    rule_descriptions[rule_id]["fullDescription"]["text"] = msg.strip()
-    rule_descriptions[rule_id]["defaultConfiguration"]["level"] = lvl
+    # 2) Build a stable ruleId, e.g. 'flawfinder.strcpy'
+    token = re.match(r'(\w+)', msg)
+    rid   = f"flawfinder.{token.group(1) if token else 'unknown'}"
 
+    # 3) Update rule metadata
+    rule_meta[rid]["fullDescription"]["text"] = msg.strip()
+    rule_meta[rid]["defaultConfiguration"]["level"] = level
+
+    # 4) Emit the result
     sarif["runs"][0]["results"].append({
-        "ruleId": rule_id,
-        "level": lvl,
-        "message": {"text": msg.strip()},
-        "properties": {"security-severity": sev},
-        "locations": [{
-            "physicalLocation": {
-                "artifactLocation": {"uri": path},
-                "region": {"startLine": int(line_no)}
-            }
-        }]
+      "ruleId":    rid,
+      "level":     level,
+      "message":   {"text": msg.strip()},
+      "properties":{"security-severity": sev},
+      "locations": [{
+        "physicalLocation": {
+          "artifactLocation": {"uri": rel},
+          "region":           {"startLine": int(line_no)}
+        }
+      }]
     })
 
-# Add rules metadata to SARIF
+# 5) Attach the rules array
 sarif["runs"][0]["tool"]["driver"]["rules"] = [
-    {"id": rid, **meta} for rid, meta in rule_descriptions.items()
+  {"id": rid, **meta}
+  for rid, meta in rule_meta.items()
 ]
 
-# Write out the final SARIF file
-with open(outfile, "w") as f:
-    json.dump(sarif, f, indent=2)
+# 6) Dump it out
+with open(outfile, "w") as outf:
+  json.dump(sarif, outf, indent=2)

@@ -1,2 +1,10 @@
-- name: C++ code check using clang/cppcheck/flawfinder
-  uses: Tlazypanda/cpp-clang-check@0.13
+name: lint
+
+on: [pull_request]
+jobs:
+  clang-tidy:
+    name: clang-tidy
+    runs-on: ubuntu-latest
+    steps:
+      - name: C++ code check using clang/cppcheck/flawfinder
+        uses: Tlazypanda/cpp-clang-check@0.13

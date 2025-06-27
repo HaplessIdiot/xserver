@@ -9,23 +9,22 @@ on:
 
 jobs:
   flawfinder:
-    name: Run Flawfinder and upload SARIF
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install Flawfinder
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y flawfinder  # or: pip3 install flawfinder
+        run: sudo apt-get update && sudo apt-get install -y flawfinder
 
-      - name: Run Flawfinder → SARIF
-        # scan entire repo, min level 1 (Note+), output SARIF
+      - name: Run Flawfinder to CSV
         run: |
-          flawfinder --minlevel=1 --sarif . > flawfinder-results.sarif
+          flawfinder --minlevel=1 --dataonly . > flawfinder.csv
 
-      - name: Upload SARIF to GitHub
+      - name: Convert CSV → SARIF
+        run: |
+          python3 .github/scripts/filter_flawfinder_sarif.py flawfinder.csv flawfinder.sarif
+
+      - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: flawfinder-results.sarif
+          sarif_file: flawfinder.sarif

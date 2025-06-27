@@ -1,0 +1,42 @@
+# .github/workflows/flawfinder.yml
+name: Flawfinder
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: '17 0 * * 1'
+
+jobs:
+  flawfinder:
+    name: Flawfinder
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Flawfinder (high-risk only)
+        uses: david-a-wheeler/flawfinder@8e4a779ad59dbfaee5da586aa9210853b701959c
+        with:
+          # --minlevel 4 = only show level 4/5 hits
+          # --context    = give you source lines around each hit
+          # --ignorelist = optional file listing patterns to skip
+          arguments: >
+            --sarif ./
+            --minlevel 4
+            --context
+            --ignorelist .github/flawfinder.ignore
+          output: flawfinder_results.sarif
+
+      - name: Upload to Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: flawfinder_results.sarif

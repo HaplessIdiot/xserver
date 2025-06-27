@@ -4,56 +4,31 @@ name: Flawfinder
 on:
   push:
     branches: [master]
-    # don’t waste cycles on docs, tests or 3rd-party
-    paths-ignore:
-      - "docs/**"
-      - "test/**"
-      - "vendor/**"
+    paths-ignore: ["docs/**","test/**","vendor/**"]
   pull_request:
     branches: [master]
-    paths-ignore:
-      - "docs/**"
-      - "test/**"
-      - "vendor/**"
-  schedule:
-    - cron: '17 0 * * 1'
+    paths-ignore: ["docs/**","test/**","vendor/**"]
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
-  flawfinder:
+  scan:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install Flawfinder
         run: sudo apt-get update && sudo apt-get install -y flawfinder python3
 
-      - name: Run Flawfinder (very high risk only)
-        uses: david-a-wheeler/flawfinder@8e4a779ad59dbfaee5da586aa9210853b701959c
-        with:
-          # --minlevel 5 = only level-5/“very high” hits
-          # --context  = include source lines for triage
-          # --ignorelist points at patterns you deem safe
-          arguments: >
-            --sarif ./
-            --minlevel 5
-            --context
-            --ignorelist .github/flawfinder.ignore
-            src/
-
-          # SARIF file will land here
-          output: flawfinder_results.sarif
-
-      - name: Filter out any leftover noise
+      - name: Run Flawfinder → raw SARIF
         run: |
+          flawfinder --sarif ./ --minlevel 1 ./src > flawfinder.txt || true
           python3 .github/scripts/filter_flawfinder_sarif.py \
-            flawfinder_results.sarif flawfinder_results.filtered.sarif
+            flawfinder.txt flawfinder.sarif
 
-      - name: Upload SARIF to Security tab
+      - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: flawfinder_results.filtered.sarif
+          sarif_file: flawfinder.sarif

@@ -1,6 +1,10 @@
 # .github/workflows/flawfinder-analysis.yml
 name: Flawfinder Code Scanning
 
+permissions:
+  contents: read
+  security-events: write
+
 on:
   push:
     branches: [ master ]

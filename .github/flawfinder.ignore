@@ -1,8 +1,0 @@
-# C library calls we audit manually  
-printf  
-snprintf  
-memcpy  
-
-# auto-generated headers we never scan  
-third_party/  
-vendor/  

@@ -273,8 +273,9 @@ CreateWellKnownSockets(void)
         FatalError ("Tried to clear too many listening sockets - OOM");
         return; // mostly to keep GCC from complaining about too large alloc
     }
-
-    ListenTransFds = calloc(ListenTransCount, sizeof(int));
+    /* make sure we never hand calloc() a negative number */
+    if (ListenTransCount < 0) ListenTransCount = 0;
+    ListenTransFds = calloc((size_t)ListenTransCount, sizeof *ListenTransFds);
     if (ListenTransFds == NULL)
         FatalError ("Failed to create listening socket array");
 

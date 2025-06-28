@@ -147,7 +147,7 @@ set_poll_clients(void);
 
 static XtransConnInfo *ListenTransConns = NULL;
 static int *ListenTransFds = NULL;
-static ListenTransCount;
+static int ListenTransCount;
 
 static void ErrorConnMax(XtransConnInfo /* trans_conn */ );
 
@@ -244,7 +244,7 @@ CreateWellKnownSockets(void)
      * number if specified on the command line. */
 
     if (NoListenAll) {
-       ListenTransCount = 0;
+        ListenTransCount = 0;
     }
     else if ((displayfd < 0) || explicit_display) {
         if (TryCreateSocket(atoi(display), &partial) &&
@@ -273,9 +273,8 @@ CreateWellKnownSockets(void)
         FatalError ("Tried to clear too many listening sockets - OOM");
         return; // mostly to keep GCC from complaining about too large alloc
     }
-    /* make sure we never hand calloc() a negative number */
-    if (ListenTransCount < 0) ListenTransCount = 0;
-    ListenTransFds = calloc((size_t)ListenTransCount, sizeof *ListenTransFds);
+
+    ListenTransFds = calloc(ListenTransCount, sizeof(int));
     if (ListenTransFds == NULL)
         FatalError ("Failed to create listening socket array");
 

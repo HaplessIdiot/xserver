@@ -419,7 +419,6 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
     long ver = data->xf86version;
     /* Always ignore ABI mismatches by default */
     LoaderOptions |= LDR_OPT_ABI_MISMATCH_NONFATAL;
-    MessageType errtype;
 
     LogMessage(X_INFO, "Module %s: vendor=\"%s\"\n",
                data->modname ? data->modname : "UNKNOWN!",

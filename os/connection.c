@@ -147,7 +147,7 @@ set_poll_clients(void);
 
 static XtransConnInfo *ListenTransConns = NULL;
 static int *ListenTransFds = NULL;
-static int ListenTransCount;
+static size_t ListenTransCount;
 
 static void ErrorConnMax(XtransConnInfo /* trans_conn */ );
 
@@ -244,7 +244,7 @@ CreateWellKnownSockets(void)
      * number if specified on the command line. */
 
     if (NoListenAll) {
-       size_t ListenTransCount = 0;
+       ListenTransCount = 0;
     }
     else if ((displayfd < 0) || explicit_display) {
         if (TryCreateSocket(atoi(display), &partial) &&

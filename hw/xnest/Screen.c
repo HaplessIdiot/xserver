@@ -305,7 +305,6 @@ breakout:
 
     /* myNum */
     /* id */
-    rootDepth = defaultVisual->nplanes;
     if (!miScreenInit(pScreen, NULL, xnestGeometry.width, xnestGeometry.height,
                       1, 1, xnestGeometry.width, rootDepth, numDepths, depths, defaultVisual, /* root visual */
                       numVisuals, visuals))

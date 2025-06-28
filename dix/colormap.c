@@ -1655,10 +1655,10 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
         (npixG > pmap->freeGreen) || (npixG < c) ||
         (npixB > pmap->freeBlue) || (npixB < c))
         return BadAlloc;
+
     /* start out with empty pixels */
-    c = min(c, ...allocated colors...);
-    for (p = 0; p <  c; p++)
-        pixels[p] = 0;
+    for (p = pixels; (p - pixels) < c; p++)
+        *p = 0;
 
     ppixRed = calloc(npixR, sizeof(Pixel));
     ppixGreen = calloc(npixG, sizeof(Pixel));

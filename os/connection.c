@@ -244,7 +244,7 @@ CreateWellKnownSockets(void)
      * number if specified on the command line. */
 
     if (NoListenAll) {
-        ListenTransCount = 0;
+       size_t ListenTransCount = 0;
     }
     else if ((displayfd < 0) || explicit_display) {
         if (TryCreateSocket(atoi(display), &partial) &&

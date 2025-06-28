@@ -147,7 +147,7 @@ set_poll_clients(void);
 
 static XtransConnInfo *ListenTransConns = NULL;
 static int *ListenTransFds = NULL;
-static size_t ListenTransCount;
+static ListenTransCount;
 
 static void ErrorConnMax(XtransConnInfo /* trans_conn */ );
 

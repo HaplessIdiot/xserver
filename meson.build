@@ -3,10 +3,10 @@ project('xserver', 'c',
             'buildtype=debugoptimized',
             'c_std=gnu99',
         ],
-        version: '25.0.0.5',
+        version: '25.0.0.7',
         meson_version: '>= 0.58.0',
 )
-release_date = '2025-07-11'
+release_date = '2025-07-29'
 
 add_project_arguments('-DHAVE_DIX_CONFIG_H', language: ['c', 'objc'])
 cc = meson.get_compiler('c')
@@ -181,12 +181,15 @@ if ['windows', 'darwin', 'cygwin'].contains(host_machine.system())
     hal_option = 'false'
 endif
 
-build_udev = get_option('udev')
-build_udev_kms = get_option('udev_kms')
-if ['windows', 'darwin', 'freebsd', 'netbsd', 'openbsd', 'sunos'].contains(host_machine.system())
-    build_udev = false
-    build_udev_kms = false
+udev_option = get_option('udev')
+udev_kms_option = get_option('udev_kms')
+if not dependency('libudev', required: (udev_option == 'true' or udev_kms_option == 'true')).found()
+    udev_option = 'false'
+    udev_kms_option = 'false'
 endif
+
+build_udev = (udev_option != 'false')
+build_udev_kms = (udev_kms_option != 'false')
 
 if get_option('systemd_logind') == 'auto'
     build_systemd_logind = build_udev_kms and dbus_dep.found()
@@ -502,22 +505,9 @@ if build_res
     build_hashtable = true
 endif
 
-build_xace = get_option('xace')
 build_xinerama = get_option('xinerama')
-
 build_xsecurity = get_option('xcsecurity')
-if build_xsecurity
-    if not build_xace
-        error('cannot build Security extension without X-ACE')
-    endif
-endif
-
 build_namespace = get_option('namespace')
-if build_namespace
-    if not build_xace
-        error('cannot build Container extension without X-ACE')
-    endif
-endif
 
 build_xv = get_option('xv')
 build_xvmc = get_option('xvmc')

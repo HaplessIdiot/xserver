@@ -33,6 +33,7 @@ Equipment Corporation.
 
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
@@ -1064,28 +1065,26 @@ ProcXineramaQueryScreens(ClientPtr client)
         swapl(&rep.length);
         swapl(&rep.number);
     }
-    WriteToClient(client, sizeof(xXineramaQueryScreensReply), &rep);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (!noPanoramiXExtension) {
-        xXineramaScreenInfo scratch;
         int i;
-
         FOR_NSCREENS_BACKWARD(i) {
-            scratch.x_org = screenInfo.screens[i]->x;
-            scratch.y_org = screenInfo.screens[i]->y;
-            scratch.width = screenInfo.screens[i]->width;
-            scratch.height = screenInfo.screens[i]->height;
-
-            if (client->swapped) {
-                swaps(&scratch.x_org);
-                swaps(&scratch.y_org);
-                swaps(&scratch.width);
-                swaps(&scratch.height);
-            }
-            WriteToClient(client, sz_XineramaScreenInfo, &scratch);
+            xXineramaScreenInfo scratch = {
+                .x_org = screenInfo.screens[i]->x,
+                .y_org = screenInfo.screens[i]->y,
+                .width = screenInfo.screens[i]->width,
+                .height = screenInfo.screens[i]->height,
+            };
+            /* scratch consists of 4x CARD16 */
+            if (!x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)&scratch, 4))
+                return BadAlloc;
         }
     }
 
+    WriteToClient(client, sizeof(xXineramaQueryScreensReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
@@ -1299,3 +1298,20 @@ XineramaGetImageData(DrawablePtr *pDrawables,
     RegionUninit(&SrcRegion);
     RegionUninit(&GrabRegion);
 }
+
+// work around broken X11 proto headers
+#define sz_xXineramaQueryScreensReply sz_XineramaQueryScreensReply
+#define sz_xXineramaIsActiveReply sz_XineramaIsActiveReply
+#define sz_xPanoramiXGetScreenSizeReply sz_panoramiXGetScreenSizeReply
+#define sz_xPanoramiXGetScreenCountReply sz_panoramiXGetScreenCountReply
+#define sz_xPanoramiXGetStateReply sz_panoramiXGetStateReply
+
+XTYPE_SIZE_ASSERT(xPanoramiXQueryVersionReply);
+XTYPE_SIZE_ASSERT(xPanoramiXGetStateReply);
+XTYPE_SIZE_ASSERT(xPanoramiXGetScreenCountReply);
+XTYPE_SIZE_ASSERT(xPanoramiXGetScreenSizeReply);
+XTYPE_SIZE_ASSERT(xXineramaIsActiveReply);
+XTYPE_SIZE_ASSERT(xTranslateCoordsReply);
+XTYPE_SIZE_ASSERT(xXineramaQueryScreensReply);
+XTYPE_SIZE_ASSERT(xGetGeometryReply);
+XTYPE_SIZE_ASSERT(xGetImageReply);

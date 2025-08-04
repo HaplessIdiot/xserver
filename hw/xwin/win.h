@@ -145,6 +145,7 @@
 #include <X11/Xprotostr.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/dix_priv.h"
 
 #include "scrnintstr.h"
 #include "pixmapstr.h"
@@ -242,7 +243,7 @@ static Atom func (void) {					\
     static Atom atom;						\
     if (generation != serverGeneration) {			\
 	generation = serverGeneration;				\
-	atom = MakeAtom (atom_name, strlen (atom_name), TRUE);	\
+	atom = dixAddAtom(atom_name);				\
     }								\
     return atom;						\
 }

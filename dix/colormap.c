@@ -1787,8 +1787,11 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
         ppix += pmap->numPixelsRed[client];
         *pppixFirst = ppix;
         pDst = pixels;
+        /* bulk-copy all temporary pixels into the clientPixelsRed array */
+        memcpy(ppix, ppixTemp, npix * sizeof(Pixel));
+        ppix += npix;
+
         for (Pixel *p = ppixTemp; p < ppixTemp + npix; p++) {
-            *ppix++ = *p;
             if (p < ppixTemp + c)
                 *pDst++ = *p;
         }

@@ -46,6 +46,7 @@ from The Open Group.
  * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <dix-config.h>
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -53,6 +54,8 @@ from The Open Group.
 #ifdef HAVE_SYSTEMD_DAEMON
 #include <systemd/sd-daemon.h>
 #endif
+
+#include "os/ossock.h"
 
 /*
  * The transport table contains a definition for every transport (protocol)
@@ -114,13 +117,6 @@ Xtransport_table Xtransports[] = {
 
 #define NUMTRANS	(sizeof(Xtransports)/sizeof(Xtransport_table))
 
-
-#ifdef WIN32
-#define ioctl ioctlsocket
-#endif
-
-
-
 /*
  * These are a few utility function used by the public interface functions.
  */
@@ -401,13 +397,7 @@ _XSERVTransOpen (int type, const char *address)
 
     prmsg (2,"Open(%d,%s)\n", type, address);
 
-#if defined(WIN32) && defined(TCPCONN)
-    if (_XSERVTransWSAStartup())
-    {
-	prmsg (1,"Open: WSAStartup failed\n");
-	return NULL;
-    }
-#endif
+    ossock_init();
 
     /* Parse the Address */
 
@@ -567,7 +557,7 @@ int _XSERVTransNonBlock(XtransConnInfo ciptr)
 	{
 	    int arg;
 	    arg = 1;
-	    ret = ioctl (fd, FIOSNBIO, &arg);
+	    ret = ossock_ioctl (fd, FIOSNBIO, &arg);
 	}
 #else
 #if defined(WIN32)
@@ -575,7 +565,7 @@ int _XSERVTransNonBlock(XtransConnInfo ciptr)
 	    u_long arg_ret = 1;
 /* IBM TCP/IP understands this option too well: it causes _XSERVTransRead to fail
  * eventually with EWOULDBLOCK */
-	    ret = ioctl (fd, FIONBIO, &arg_ret);
+	    ret = ossock_ioctl (fd, FIONBIO, &arg_ret);
 	}
 #else
 	    ret = fcntl (fd, F_GETFL, 0);

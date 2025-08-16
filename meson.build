@@ -765,8 +765,6 @@ endif
 
 subdir('hw')
 
-option('builtin_amdgpu', type: 'boolean', value: true, description: 'Link amdgpu driver directly into XLibre binary')
-
 amdgpu_static = []
 if build_xorg and get_option('builtin_amdgpu')
     subdir('hw/xfree86/drivers/amdgpu')

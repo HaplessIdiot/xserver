@@ -195,12 +195,6 @@ xorgserver_lib = shared_library(
 
 xorgserver_dep = declare_dependency(link_with: xorgserver_lib)
 
-amdgpu_drv = static_library(
-    'amdgpu_drv',
-    amdgpu_srcs,
-    dependencies: amdgpu_deps
-)
-
 install_man(configure_file(
     input: 'man/Xorg.man',
     output: 'Xorg.1',

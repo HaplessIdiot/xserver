@@ -26,7 +26,14 @@ amdgpu_drv = static_library(
     ],
     pic: true  # keep it position-independent in case it’s linked into a PIC binary
 )
-
+amdgpu_deps = []
+if get_option('builtin_amdgpu')
+  amdgpu_deps += [
+    dependency('xorg-server'),
+    dependency('libdrm_amdgpu', version: '>= 2.4.60'),
+    dependency('pciaccess'),
+  ]
+endif
 # Test that we don't have any unresolved symbols from our module to Xorg.
 xorg_build_root = join_paths(meson.project_build_root(), 'hw', 'xfree86')
 symbol_test_args = []

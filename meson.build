@@ -767,7 +767,7 @@ subdir('hw')
 
 amdgpu_static = []
 if build_xorg and get_option('builtin_amdgpu')
-    subdir('hw/xfree86/drivers/amdgpu')
+    subdir('hw/xfree86/drivers/video/amdgpu/src')
     amdgpu_static += amdgpu_drv
 endif
 
@@ -875,7 +875,7 @@ if build_xorg and get_option('builtin_amdgpu')
     executable('Xorg',
         [],
         include_directories: inc,
-        link_whole: libxserver + amdgpu_static,
+        link_whole: [libxserver, amdgpu_static],
         dependencies: common_dep,
         install: true
     )

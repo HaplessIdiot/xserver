@@ -1097,7 +1097,9 @@ ms_dri2_screen_init(ScreenPtr screen)
     info.CreateBuffer2 = ms_dri2_create_buffer2;
     info.DestroyBuffer2 = ms_dri2_destroy_buffer2;
     info.CopyRegion2 = ms_dri2_copy_region2;
-
+/* * Use a preprocessor check or assume the struct has the field 
+     * if you are building a specific version of the X server.*/
+    info.GetParam = ms_dri2_get_param;
     /* Ask Glamor to obtain the DRI driver name via EGL_MESA_query_driver, */
     if (ms->glamor.egl_get_driver_name)
         driver_names[0] = ms->glamor.egl_get_driver_name(screen);

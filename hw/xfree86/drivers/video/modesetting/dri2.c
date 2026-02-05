@@ -85,6 +85,27 @@ struct ms_dri2_resource {
     struct xorg_list list;
 };
 
+static int
+ms_dri2_get_param(DrawablePtr drawable, DRI2Param param, uint64_t *value)
+{
+    ScreenPtr screen = drawable->pScreen;
+    ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
+    modesettingPtr ms = modesettingPTR(scrn);
+
+    switch (param) {
+    case DRI2ParamPrimeSync:
+        /* Report support for PRIME Synchronization */
+        *value = 1;
+        return Success;
+    case DRI2ParamUseInvalNotify:
+        /* Use invalidation notifications for buffer management */
+        *value = 1;
+        return Success;
+    default:
+        return BadValue;
+    }
+}
+
 static struct ms_dri2_resource *
 ms_get_resource(XID id, RESTYPE type)
 {
@@ -1060,7 +1081,7 @@ ms_dri2_screen_init(ScreenPtr screen)
     info.driverName = NULL; /* Compat field, unused. */
     info.deviceName = drmGetDeviceNameFromFd(ms->fd);
 
-    info.version = 9;
+    info.version = 11;
     info.CreateBuffer = ms_dri2_create_buffer;
     info.DestroyBuffer = ms_dri2_destroy_buffer;
     info.CopyRegion = ms_dri2_copy_region;

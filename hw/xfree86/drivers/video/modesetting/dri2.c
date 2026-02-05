@@ -165,8 +165,12 @@ ms_dri2_create_buffer2(ScreenPtr screen, DrawablePtr drawable,
     pixmap = NULL;
     if (attachment == DRI2BufferFrontLeft) {
         pixmap = get_drawable_pixmap(drawable);
+        /* * PRIME Fix: If the pixmap is on a different screen, we must 
+         * create a new local pixmap to act as the shared buffer.
+         */
         if (pixmap && pixmap->drawable.pScreen != screen)
             pixmap = NULL;
+
         if (pixmap)
             pixmap->refcnt++;
     }
@@ -176,10 +180,7 @@ ms_dri2_create_buffer2(ScreenPtr screen, DrawablePtr drawable,
         int pixmap_height = drawable->height;
         int pixmap_cpp = (format != 0) ? format : drawable->depth;
 
-        /* Assume that non-color-buffers require special
-         * device-specific handling.  Mesa currently makes no requests
-         * for non-color aux buffers.
-         */
+        /* Verify attachment support for color buffers */
         switch (attachment) {
         case DRI2BufferAccum:
         case DRI2BufferBackLeft:
@@ -218,13 +219,12 @@ ms_dri2_create_buffer2(ScreenPtr screen, DrawablePtr drawable,
     buffer->attachment = attachment;
     buffer->cpp = pixmap->drawable.bitsPerPixel / 8;
     buffer->format = format;
-    /* The buffer's flags field is unused by the client drivers in
-     * Mesa currently.
-     */
     buffer->flags = 0;
 
+    /* Use glamor to get the global name (handle) for the pixmap */
     buffer->name = ms->glamor.name_from_pixmap(pixmap, &pitch, &size);
     buffer->pitch = pitch;
+    
     if (buffer->name == -1) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR,
                    "Failed to get DRI2 name for pixmap\n");
@@ -240,7 +240,6 @@ ms_dri2_create_buffer2(ScreenPtr screen, DrawablePtr drawable,
 
     return buffer;
 }
-
 static DRI2Buffer2Ptr
 ms_dri2_create_buffer(DrawablePtr drawable, unsigned int attachment,
                       unsigned int format)

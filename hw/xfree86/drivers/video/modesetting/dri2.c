@@ -45,6 +45,13 @@
 #include "dri2.h"
 
 #ifdef GLAMOR_HAS_GBM
+/* Local definitions for DRI2 1.4+ support if headers are old */
+#ifndef DRI2INFOREC_HAS_GETPARAM
+typedef enum {
+    DRI2ParamPrimeSync = 0,
+    DRI2ParamUseInvalNotify = 1,
+} DRI2Param;
+#endif
 
 enum ms_dri2_frame_event_type {
     MS_DRI2_QUEUE_SWAP,

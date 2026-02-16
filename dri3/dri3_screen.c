@@ -208,7 +208,7 @@ cache_formats_and_modifiers(ScreenPtr screen)
         iter->modifiers = modifiers;
     }
 
-    ds->num_formats = i;
+    ds->num_formats = num_formats;
     ds->formats_cached = TRUE;
 
     free(formats);
